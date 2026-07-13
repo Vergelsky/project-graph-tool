@@ -1,17 +1,21 @@
-const NODE_COLORS = {
-  ENTRY_POINT: '#e11d48',
-  VIEW: '#2563eb',
-  SERVICE: '#7c3aed',
-  METHOD: '#0891b2',
-  FUNCTION: '#0d9488',
-  ORM: '#ca8a04',
-  DATABASE: '#374151',
-  TABLE: '#6b7280',
-  EXTERNAL_API: '#dc2626',
-  QUEUE: '#ea580c',
-  CACHE: '#65a30d',
-  UNKNOWN: '#9ca3af',
+const NODE_STYLES = {
+  ENTRY_POINT: { bg: '#fff1f2', text: '#9f1239', border: '#fecdd3', accent: '#e11d48' },
+  VIEW: { bg: '#eff6ff', text: '#1e40af', border: '#bfdbfe', accent: '#2563eb' },
+  SERVICE: { bg: '#f5f3ff', text: '#5b21b6', border: '#ddd6fe', accent: '#7c3aed' },
+  METHOD: { bg: '#ecfeff', text: '#155e75', border: '#a5f3fc', accent: '#0891b2' },
+  FUNCTION: { bg: '#f0fdfa', text: '#115e59', border: '#99f6e4', accent: '#0d9488' },
+  ORM: { bg: '#fefce8', text: '#854d0e', border: '#fde68a', accent: '#ca8a04' },
+  DATABASE: { bg: '#f3f4f6', text: '#1f2937', border: '#d1d5db', accent: '#374151' },
+  TABLE: { bg: '#f9fafb', text: '#374151', border: '#e5e7eb', accent: '#6b7280' },
+  EXTERNAL_API: { bg: '#fef2f2', text: '#991b1b', border: '#fecaca', accent: '#dc2626' },
+  QUEUE: { bg: '#fff7ed', text: '#9a3412', border: '#fed7aa', accent: '#ea580c' },
+  CACHE: { bg: '#f7fee7', text: '#3f6212', border: '#d9f99d', accent: '#65a30d' },
+  UNKNOWN: { bg: '#f3f4f6', text: '#4b5563', border: '#d1d5db', accent: '#9ca3af' },
 };
+
+function resolveNodeStyle(type) {
+  return NODE_STYLES[type] || NODE_STYLES.UNKNOWN;
+}
 
 const NODE_WIDTH = 200;
 const NODE_HEIGHT = 72;
@@ -19,7 +23,7 @@ const COMPACT_BODY_LIMIT = 72;
 
 let cy = null;
 let rawData = null;
-let activeTypes = new Set(Object.keys(NODE_COLORS));
+let activeTypes = new Set(Object.keys(NODE_STYLES));
 let expandedNodeId = null;
 let currentGraphFingerprint = null;
 let persistDraftTimer = null;
@@ -257,10 +261,11 @@ function nodeHtmlTpl(data) {
   const body = bodyTextForNode(data);
   const expandedClass = data.isExpanded ? ' pg-node__body--expanded' : '';
   const highlightedClass = data._highlighted ? ' pg-node__body--highlighted' : '';
-  const color = data.color || '#9ca3af';
+  const style = resolveNodeStyle(data.type);
+  const bodyStyle = `background-color:${style.bg};color:${style.text};border-color:${style.border}`;
   return `<div class="pg-node" data-node-id="${escapeHtml(data.id)}">
     <div class="pg-node__title">${escapeHtml(title)}</div>
-    <div class="pg-node__body${expandedClass}${highlightedClass}" style="background-color:${color}">${escapeHtml(body)}</div>
+    <div class="pg-node__body${expandedClass}${highlightedClass}" style="${bodyStyle}">${escapeHtml(body)}</div>
   </div>`;
 }
 
@@ -363,8 +368,8 @@ function initCy() {
       {
         selector: '.highlighted',
         style: {
-          'line-color': '#f59e0b',
-          'target-arrow-color': '#f59e0b',
+          'line-color': '#d97706',
+          'target-arrow-color': '#d97706',
           width: 3,
         },
       },
@@ -429,7 +434,7 @@ function loadGraph(data) {
       data: {
         id: node.id,
         type: node.type,
-        color: NODE_COLORS[node.type] || '#9ca3af',
+        nodeStyle: resolveNodeStyle(node.type),
         isExpanded: false,
         _highlighted: false,
         ...node,
@@ -556,7 +561,8 @@ function showNodeDetails(data) {
 
 function buildTypeFilters() {
   const container = document.getElementById('type-filters');
-  Object.keys(NODE_COLORS).forEach((type) => {
+  Object.keys(NODE_STYLES).forEach((type) => {
+    const style = NODE_STYLES[type];
     const label = document.createElement('label');
     const cb = document.createElement('input');
     cb.type = 'checkbox';
@@ -567,7 +573,12 @@ function buildTypeFilters() {
       else activeTypes.delete(type);
       applyFilters();
     });
+    const swatch = document.createElement('span');
+    swatch.className = 'type-swatch';
+    swatch.style.backgroundColor = style.accent;
+    swatch.style.borderColor = style.border;
     label.appendChild(cb);
+    label.appendChild(swatch);
     label.appendChild(document.createTextNode(` ${type}`));
     container.appendChild(label);
   });
