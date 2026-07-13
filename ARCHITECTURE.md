@@ -107,17 +107,21 @@ PostgreSQL
 
 ## Jedi
 
-Разрешение ссылок.
+Разрешение call sites через pipeline в `definition_resolver.py`:
 
-Определяет, какая конкретно функция или метод будет вызван.
+1. tree-sitter извлекает вызовы (`CallInfo`, включая `callee_column`).
+2. `goto(follow_imports=True)` и `infer()` на нескольких позициях call site.
+3. Выбирается лучшее определение **внутри project_path** (не import line, не site-packages).
+4. Для `Class.method` — fallback `resolve_class_method`.
+5. BFS (`incremental_call_graph.py`) разворачивает только **expandable** callee (function/method).
+
+Ограничения: динамические вызовы (`getattr`, signals, celery `.delay()`, часть Django Manager API) остаются `depends_on`.
 
 ---
 
 ## Pyright
 
-Дополняет Jedi анализом типов.
-
-Позволяет точнее определить реальные связи между объектами.
+Опциональное дополнение (заготовка в `pyright_bridge.py`). В hot path trace пока не используется.
 
 ---
 

@@ -68,13 +68,9 @@ class CallGraphBuilder:
                         metadata={"synthetic": True},
                     )
                 )
-            if call.resolved and call.callee_qualified_name:
-                callee_id = self._qname_to_id.get(
-                    call.callee_qualified_name,
-                    make_node_id(call.callee_qualified_name, call.source_file, call.line),
-                )
+            if call.resolved and call.expandable and call.callee_qualified_name and call.source_file and call.line:
+                callee_id = make_node_id(call.callee_qualified_name, call.source_file, call.line)
                 if not self.graph.get_node(callee_id):
-                    self._qname_to_id[call.callee_qualified_name] = callee_id
                     self.graph.add_node(
                         Node(
                             id=callee_id,

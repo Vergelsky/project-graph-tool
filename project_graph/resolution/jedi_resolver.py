@@ -10,6 +10,7 @@ import jedi
 
 from project_graph.config import get_repo_root
 from project_graph.parsing.extractors import CallInfo, FileAnalysis
+from project_graph.resolution.definition_resolver import resolve_call_site
 
 
 @dataclass
@@ -23,6 +24,8 @@ class ResolvedCall:
     call_column: int
     is_await: bool
     resolved: bool
+    expandable: bool = False
+    def_kind: str | None = None
     unresolved_reason: str | None = None
 
 
@@ -53,52 +56,45 @@ class JediResolver:
             source = full_path.read_text(encoding="utf-8")
         script = jedi.Script(source, path=str(self._repo_root / source_file), project=self._project)
         try:
-            definitions = script.goto(call.line, call.column)
+            resolved = resolve_call_site(script, call, self._repo_root, source=source)
         except Exception as exc:
             return self._unresolved(call, str(exc))
-        if not definitions:
+        if not resolved:
             return self._unresolved(call, "no_definitions")
-        try:
-            return self._resolved_from_definition(call, definitions[0])
-        except Exception as exc:
-            print(f"Warning: Jedi infer failed at {source_file}:{call.line}: {exc}")
-            return self._unresolved(call, str(exc))
+        if not resolved.expandable:
+            return ResolvedCall(
+                caller_qualified_name=call.caller_qualified_name,
+                callee_text=call.callee_text,
+                callee_qualified_name=resolved.qualified_name,
+                source_file=resolved.source_file,
+                line=resolved.line,
+                call_line=call.line,
+                call_column=call.column,
+                is_await=call.is_await,
+                resolved=False,
+                expandable=False,
+                def_kind=resolved.def_kind,
+                unresolved_reason=f"non_expandable:{resolved.def_kind}",
+            )
+        return ResolvedCall(
+            caller_qualified_name=call.caller_qualified_name,
+            callee_text=call.callee_text,
+            callee_qualified_name=resolved.qualified_name,
+            source_file=resolved.source_file,
+            line=resolved.line,
+            call_line=call.line,
+            call_column=call.column,
+            is_await=call.is_await,
+            resolved=True,
+            expandable=True,
+            def_kind=resolved.def_kind,
+        )
 
     def resolve_file(self, analysis: FileAnalysis) -> list[ResolvedCall]:
         """Resolve all calls in a file analysis."""
         full_path = self._repo_root / analysis.source_file
         source = full_path.read_text(encoding="utf-8")
         return [self.resolve_call(analysis.source_file, call, source) for call in analysis.calls]
-
-    def _resolved_from_definition(self, call: CallInfo, defn) -> ResolvedCall:
-        """Build ResolvedCall from a Jedi definition."""
-        module = defn.module_name or ""
-        name = defn.name or call.callee_text
-        try:
-            defn_type = defn.type
-        except Exception:
-            defn_type = ""
-        if defn_type in ("function", "method", "class"):
-            qname = f"{module}.{name}" if module else name
-        else:
-            qname = defn.full_name or name
-        rel_path = None
-        if defn.module_path:
-            try:
-                rel_path = str(defn.module_path.relative_to(self._repo_root)).replace("\\", "/")
-            except ValueError:
-                rel_path = str(defn.module_path)
-        return ResolvedCall(
-            caller_qualified_name=call.caller_qualified_name,
-            callee_text=call.callee_text,
-            callee_qualified_name=qname,
-            source_file=rel_path,
-            line=defn.line,
-            call_line=call.line,
-            call_column=call.column,
-            is_await=call.is_await,
-            resolved=True,
-        )
 
     @staticmethod
     def _unresolved(call: CallInfo, reason: str) -> ResolvedCall:
@@ -113,5 +109,6 @@ class JediResolver:
             call_column=call.column,
             is_await=call.is_await,
             resolved=False,
+            expandable=False,
             unresolved_reason=reason,
         )

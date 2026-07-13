@@ -265,6 +265,14 @@ project-graph-tool/
 | Viewer пустой / ошибка загрузки | Сначала `.\run.ps1 trace`, затем `.\serve.ps1` |
 | Граф не загружается в viewer | Используйте `serve.ps1`, не `http.server` из viewer/ |
 | `EOFError` / падение Jedi на отдельном файле | `.\run.ps1 trace --clear-jedi-cache --def …` |
+| Граф слишком короткий после обновления tool | `.\run.ps1 trace --reset-call-graph --clear-jedi-cache --def …` |
+| Много рёбер `depends_on` | Нормально для stdlib/ORM/динамических вызовов; `calls` — разворачиваемые определения в project_path |
+
+### Резолвинг вызовов
+
+- `calls` / `awaits` — callee разрешён до **function/method** внутри `project_path`, BFS продолжается внутри тела.
+- `depends_on` — callee не разворачивается (stdlib, класс без метода, `getattr`, часть ORM-цепочек).
+- После обновления resolver пересоберите накопительный граф: `--reset-call-graph`.
 
 ---
 

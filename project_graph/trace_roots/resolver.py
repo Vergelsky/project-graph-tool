@@ -10,6 +10,7 @@ from project_graph.config import get_repo_root
 from project_graph.models import ExecutionGraph, Node, NodeType
 from project_graph.parsing.ast_store import ASTStore
 from project_graph.parsing.extractors import DefinitionInfo
+from project_graph.resolution.definition_resolver import ResolvedDefinition, resolve_at_position, resolve_class_method
 from project_graph.resolution.jedi_resolver import JediResolver
 from project_graph.trace_roots.models import TracePointer, TraceRoot
 from project_graph.trace_roots.store import TraceStore, default_root_id
@@ -121,18 +122,24 @@ class RootResolver:
         full_path = self._repo_root / rel
         if not full_path.exists():
             return None
-        stub = f"from {module} import {class_name}\n{class_name}.{method_name}"
-        script = jedi.Script(stub, path=str(full_path), project=jedi.Project(path=str(self._repo_root)))
-        try:
-            definitions = script.goto(2, len(class_name) + 1)
-        except Exception:
+        class_line = 1
+        analysis = self.ast_store.get_file(rel)
+        if analysis:
+            for defn in analysis.definitions:
+                if defn.qualified_name == class_qname and defn.kind == "class":
+                    class_line = defn.line_start
+                    break
+        class_resolved = ResolvedDefinition(
+            qualified_name=class_qname,
+            source_file=rel,
+            line=class_line,
+            def_kind="class",
+            expandable=False,
+        )
+        method = resolve_class_method(class_resolved, method_name, self._repo_root)
+        if not method:
             return None
-        if not definitions:
-            return None
-        defn = definitions[0]
-        qname = defn.full_name or qualified_name
-        rel_path = self._relative_path(defn.module_path) or rel
-        return qname, rel_path, defn.line or 1
+        return method.qualified_name, method.source_file, method.line
 
     def _resolve_def_at_line(self, source_file: str, line: int) -> tuple[str, str, int]:
         """Resolve enclosing definition at file line."""
@@ -207,20 +214,15 @@ class RootResolver:
         full_path = self._repo_root / source_file
         source = full_path.read_text(encoding="utf-8")
         line_text = source.splitlines()[line - 1] if 0 < line <= len(source.splitlines()) else ""
-        column = len(line_text) - len(line_text.lstrip()) + 1
+        column = len(line_text) - len(line_text.lstrip())
         script = jedi.Script(source, path=str(full_path), project=jedi.Project(path=str(self._repo_root)))
         try:
-            definitions = script.goto(line, column)
+            resolved = resolve_at_position(script, line, column, self._repo_root)
         except Exception:
             return None
-        if not definitions:
+        if not resolved:
             return None
-        defn = definitions[0]
-        module = defn.module_name or ""
-        name = defn.name or ""
-        qname = defn.full_name or (f"{module}.{name}" if module else name)
-        rel_path = self._relative_path(defn.module_path) or source_file
-        return qname, rel_path, defn.line or line
+        return resolved.qualified_name, resolved.source_file, resolved.line
 
     def _relative_path(self, module_path) -> str | None:
         """Convert absolute path to repo-relative."""

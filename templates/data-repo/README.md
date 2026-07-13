@@ -18,4 +18,4 @@ cd your-project-graph
 .\serve.ps1
 ```
 
-Документация: [README](../README.md)
+Документация: [project-graph-tool README](../project-graph-tool/README.md)

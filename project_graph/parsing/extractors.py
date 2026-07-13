@@ -25,6 +25,7 @@ class CallInfo:
     callee_text: str
     line: int
     column: int
+    callee_column: int = 0
     is_await: bool = False
 
 
@@ -129,12 +130,14 @@ def _extract_calls_from_body(source: str, body: TSNode, caller_qname: str, analy
                 callee = node_text(source, func_node)
                 line = node.start_point[0] + 1
                 column = node.start_point[1]
+                callee_column = func_node.start_point[1]
                 analysis.calls.append(
                     CallInfo(
                         caller_qualified_name=caller_qname,
                         callee_text=callee,
                         line=line,
                         column=column,
+                        callee_column=callee_column,
                         is_await=pending_await,
                     )
                 )

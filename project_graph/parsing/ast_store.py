@@ -81,11 +81,27 @@ def _analysis_to_dict(analysis: FileAnalysis) -> dict:
 
 def _analysis_from_dict(data: dict) -> FileAnalysis:
     """Deserialize FileAnalysis."""
-    from project_graph.parsing.extractors import CallInfo, DefinitionInfo
+    from project_graph.parsing.extractors import DefinitionInfo
 
     return FileAnalysis(
         source_file=data["source_file"],
         module=data["module"],
         definitions=[DefinitionInfo(**d) for d in data.get("definitions", [])],
-        calls=[CallInfo(**c) for c in data.get("calls", [])],
+        calls=[_call_info_from_dict(c) for c in data.get("calls", [])],
+    )
+
+
+def _call_info_from_dict(data: dict) -> CallInfo:
+    """Deserialize CallInfo with backward-compatible callee_column."""
+    from project_graph.parsing.extractors import CallInfo
+
+    column = data["column"]
+    callee_column = data.get("callee_column", column)
+    return CallInfo(
+        caller_qualified_name=data["caller_qualified_name"],
+        callee_text=data["callee_text"],
+        line=data["line"],
+        column=column,
+        callee_column=callee_column,
+        is_await=data.get("is_await", False),
     )
