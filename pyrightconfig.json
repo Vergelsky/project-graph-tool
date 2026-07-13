@@ -1,0 +1,17 @@
+{
+  "include": [".."],
+  "exclude": [
+    "**/node_modules",
+    "**/.venv",
+    "**/migrations",
+    "**/static/bundles",
+    "project_graph"
+  ],
+  "extraPaths": [".."],
+  "venvPath": ".",
+  "venv": ".venv",
+  "pythonVersion": "3.11",
+  "typeCheckingMode": "basic",
+  "reportMissingImports": false,
+  "reportMissingTypeStubs": false
+}

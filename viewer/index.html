@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Execution Map</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://unpkg.com/cytoscape@3.30.2/dist/cytoscape.min.js"></script>
+  <script src="https://unpkg.com/layout-base@2.0.1/layout-base.js"></script>
+  <script src="https://unpkg.com/cose-base@2.2.0/cose-base.js"></script>
+  <script src="https://unpkg.com/cytoscape-fcose@2.2.0/cytoscape-fcose.js"></script>
+  <script src="https://unpkg.com/cytoscape-node-html-label@1.2.2/dist/cytoscape-node-html-label.js"></script>
+</head>
+<body>
+  <div id="app">
+    <header class="toolbar">
+      <h1>Project Execution Map</h1>
+      <input type="file" id="file-input" accept=".json" title="Load JSON file manually">
+      <span id="load-status" class="load-status"></span>
+      <input type="search" id="search" placeholder="Search nodes...">
+      <select id="entry-select"><option value="">All trace roots</option></select>
+      <button id="layout-btn">Re-layout</button>
+    </header>
+    <aside id="sidebar">
+      <h2>Node</h2>
+      <div id="node-details">Select a node</div>
+      <h3>Filters</h3>
+      <div id="type-filters"></div>
+      <h3>Layout</h3>
+      <p id="layout-draft-status" class="layout-draft-status">Локальный черновик: нет</p>
+      <div class="layout-row">
+        <select id="saved-layout-select">
+          <option value="">Saved layouts…</option>
+        </select>
+        <button id="load-layout-btn" type="button">Load</button>
+      </div>
+      <div class="layout-row">
+        <input type="text" id="layout-name" placeholder="layout-name" maxlength="64">
+        <button id="save-layout-btn" type="button">Save</button>
+      </div>
+      <button id="discard-draft-btn" type="button" class="layout-discard-btn">Discard local draft</button>
+      <p class="viewer-hint">Перетаскивание узлов сохраняется в браузере. Save — в data-repo/layouts/.</p>
+      <p class="viewer-hint">ПКМ на узле — показать полное описание. Отпустите — вернуть компактный размер.</p>
+    </aside>
+    <main id="cy"></main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

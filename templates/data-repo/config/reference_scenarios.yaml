@@ -1,0 +1,9 @@
+# Reference scenarios for automated validation via inspect --check-scenario.
+
+scenarios:
+  example_flow:
+    root_id: my_view_handler
+    required_nodes:
+      - "myapp.views.orders.OrderViewSet.create"
+    optional_nodes: []
+    max_missing: 2

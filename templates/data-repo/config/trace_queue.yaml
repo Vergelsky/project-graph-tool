@@ -1,0 +1,2 @@
+# Roots queued for tracing. Process with: .\run.ps1 trace
+roots: []

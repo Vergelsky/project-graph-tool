@@ -1,0 +1,46 @@
+# Heuristics for classifying nodes by file path and name patterns.
+# Edit after first build run to tune classification.
+
+path_rules:
+  - pattern: "*/api/views/*"
+    type: VIEW
+  - pattern: "*/views/*"
+    type: VIEW
+  - pattern: "*/tools/*"
+    type: SERVICE
+  - pattern: "*/services/*"
+    type: SERVICE
+  - pattern: "*_actions.py"
+    type: SERVICE
+  - pattern: "*/models/*"
+    type: ORM
+
+name_rules:
+  - suffix: ViewSet
+    type: VIEW
+  - suffix: APIView
+    type: VIEW
+  - suffix: Client
+    type: EXTERNAL_API
+  - suffix: Repository
+    type: REPOSITORY
+
+call_rules:
+  - callee_contains: ".objects."
+    edge_type: READS
+    target_type: ORM
+  - callee_contains: ".save("
+    edge_type: WRITES
+    target_type: ORM
+  - callee_contains: ".create("
+    edge_type: CREATES
+    target_type: ORM
+  - callee_contains: "requests."
+    edge_type: CALLS
+    target_type: EXTERNAL_API
+  - callee_contains: "apply_async"
+    edge_type: EMITS
+    target_type: QUEUE
+  - callee_contains: ".delay("
+    edge_type: EMITS
+    target_type: QUEUE

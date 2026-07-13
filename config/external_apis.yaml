@@ -1,0 +1,34 @@
+# Registry of external API clients and infrastructure boundaries.
+# Review and extend per project after first trace.
+
+external_apis:
+  - qualified_name_pattern: "myapp.integrations.payments"
+    label: "Payment API"
+  - qualified_name_pattern: "myapp.integrations.ads"
+    label: "Ads API"
+  - qualified_name_pattern: "myapp.integrations.tracker"
+    label: "Tracker API"
+  - qualified_name_pattern: "boto3"
+    label: "AWS S3"
+  - qualified_name_pattern: "clickhouse_connect"
+    label: "ClickHouse"
+  - qualified_name_pattern: "requests."
+    label: "HTTP"
+  - qualified_name_pattern: "httpx."
+    label: "HTTP"
+
+databases:
+  - name: PostgreSQL
+    engine: django.db.backends.postgresql
+
+caches:
+  - name: Redis
+    pattern: "django_redis"
+  - name: Redis
+    pattern: "django.core.cache"
+
+queues:
+  - name: Celery
+    pattern: "apply_async"
+  - name: Celery
+    pattern: ".delay("
