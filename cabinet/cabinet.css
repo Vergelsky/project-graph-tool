@@ -1,0 +1,108 @@
+:root {
+  color: #1f2933;
+  background: #f4f6f8;
+  font-family: "Segoe UI", sans-serif;
+}
+
+body {
+  margin: 0;
+}
+
+.top, .panel {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 16px 20px;
+}
+
+.top {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  background: #16324f;
+  color: white;
+  max-width: none;
+}
+
+.panel {
+  background: white;
+  margin-top: 20px;
+  border-radius: 8px;
+}
+
+label {
+  display: block;
+  margin: 12px 0;
+}
+
+input {
+  display: block;
+  width: min(100%, 520px);
+  margin-top: 4px;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+.check input {
+  display: inline-block;
+  width: auto;
+}
+
+button {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.error {
+  color: #9b1c1c;
+  min-height: 1.2em;
+}
+
+.hint {
+  color: #52606d;
+}
+
+.work {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 20px;
+}
+
+#tree, #code {
+  max-height: 60vh;
+  overflow: auto;
+  border: 1px solid #d9e2ec;
+  border-radius: 6px;
+  padding: 8px;
+}
+
+.file, .line {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  font-family: Consolas, monospace;
+  white-space: pre;
+  padding: 2px 4px;
+}
+
+.line:hover, .file:hover, .line.active {
+  background: #e6f0fa;
+}
+
+details {
+  margin-left: 8px;
+}
+
+.entry {
+  display: flex;
+  gap: 8px;
+  align-items: end;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 800px) {
+  .work {
+    grid-template-columns: 1fr;
+  }
+}

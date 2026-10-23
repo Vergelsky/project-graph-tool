@@ -4,8 +4,7 @@
     "**/node_modules",
     "**/.venv",
     "**/migrations",
-    "**/static/bundles",
-    "project_graph"
+    "**/static/bundles"
   ],
   "extraPaths": [".."],
   "venvPath": ".",

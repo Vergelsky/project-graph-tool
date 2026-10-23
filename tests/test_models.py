@@ -1,6 +1,6 @@
 """Tests for graph models."""
 
-from project_graph.models import Edge, EdgeType, ExecutionGraph, Node, NodeType
+from project_map.models import Edge, EdgeType, ExecutionGraph, Node, NodeType
 
 
 def test_node_serialization_roundtrip() -> None:

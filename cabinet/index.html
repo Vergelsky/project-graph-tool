@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Кабинет карты</title>
+  <link rel="stylesheet" href="/cabinet/cabinet.css">
+</head>
+<body>
+  <header class="top">
+    <strong>Кабинет карты</strong>
+    <span id="who"></span>
+    <button id="logout" type="button" hidden>Выйти</button>
+  </header>
+
+  <main id="auth" class="panel">
+    <h1 id="auth-title">Вход</h1>
+    <form id="auth-form">
+      <label>Имя<input name="username" autocomplete="username" required></label>
+      <label>Пароль<input name="password" type="password" autocomplete="current-password" required></label>
+      <p id="auth-error" class="error"></p>
+      <button type="submit">Войти</button>
+    </form>
+    <button id="auth-switch" type="button">Создать аккаунт</button>
+  </main>
+
+  <main id="list" class="panel" hidden>
+    <h1>Проекты</h1>
+    <ul id="projects"></ul>
+    <h2>Новый проект</h2>
+    <form id="create-form">
+      <label>Название<input name="name" required></label>
+      <label>Адрес репозитория<input name="url" type="url" placeholder="https://github.com/org/repo.git" required></label>
+      <label>Токен доступа<input name="token" type="password" autocomplete="off"></label>
+      <label class="check"><input id="show-token" type="checkbox"> Показать токен, пока он не сохранён</label>
+      <p class="hint">После сохранения токен нельзя открыть снова. Его можно только заменить.</p>
+      <p id="create-error" class="error"></p>
+      <button type="submit">Сохранить и загрузить структуру</button>
+    </form>
+  </main>
+
+  <main id="project" class="panel" hidden>
+    <button id="back" type="button">К списку</button>
+    <h1 id="project-name"></h1>
+    <p id="project-url"></p>
+    <p id="token-state" class="hint"></p>
+    <form id="replace-form">
+      <label>Новый токен<input name="token" type="password" autocomplete="off" placeholder="Оставьте пустым, чтобы не менять"></label>
+      <button type="submit">Заменить токен</button>
+    </form>
+    <p id="project-error" class="error"></p>
+    <div class="work">
+      <section>
+        <h2>Файлы</h2>
+        <input id="filter" type="search" placeholder="Фильтр по пути">
+        <div id="tree"></div>
+      </section>
+      <section>
+        <h2 id="file-title">Файл</h2>
+        <p class="hint">Щёлкните строку, чтобы сделать её точкой входа. Содержимое файла запрашивается в этот момент.</p>
+        <div id="code"></div>
+      </section>
+    </div>
+    <form id="entry-form" class="entry">
+      <label>Точка входа<input name="entry" placeholder="app/views.py:42" required></label>
+      <button type="submit">Сохранить точку</button>
+      <button id="trace" type="button">Построить карту</button>
+    </form>
+    <p id="entry-state"></p>
+  </main>
+  <script src="/cabinet/cabinet.js"></script>
+</body>
+</html>

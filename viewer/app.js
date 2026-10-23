@@ -11,6 +11,8 @@ const NODE_STYLES = {
   QUEUE: { bg: '#fff7ed', text: '#9a3412', border: '#fed7aa', accent: '#ea580c' },
   CACHE: { bg: '#f7fee7', text: '#3f6212', border: '#d9f99d', accent: '#65a30d' },
   UNKNOWN: { bg: '#f3f4f6', text: '#4b5563', border: '#d1d5db', accent: '#9ca3af' },
+  FILE: { bg: '#f8fafc', text: '#334155', border: '#e2e8f0', accent: '#64748b' },
+  PACKAGE: { bg: '#faf5ff', text: '#6b21a8', border: '#e9d5ff', accent: '#9333ea' },
 };
 
 function resolveNodeStyle(type) {
@@ -162,7 +164,7 @@ function sanitizeLayoutName(name) {
 }
 
 async function fetchSavedLayouts() {
-  const response = await fetch('/layouts/');
+  const response = await fetch('../layouts/');
   if (!response.ok) {
     throw new Error(`${response.status} ${response.statusText}`);
   }
@@ -197,7 +199,7 @@ async function saveLayoutToRepo(name) {
     return;
   }
   layout.name = name;
-  const response = await fetch(`/layouts/${encodeURIComponent(name)}.json`, {
+  const response = await fetch(`../layouts/${encodeURIComponent(name)}.json`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(layout, null, 2),
@@ -214,7 +216,7 @@ async function saveLayoutToRepo(name) {
 }
 
 async function loadLayoutFromRepo(name) {
-  const response = await fetch(`/layouts/${encodeURIComponent(name)}.json`);
+  const response = await fetch(`../layouts/${encodeURIComponent(name)}.json`);
   if (!response.ok) {
     throw new Error(`${response.status} ${response.statusText}`);
   }
@@ -512,7 +514,7 @@ function highlightSubgraph(entryId) {
   }
   const reachable = new Set([entryId]);
   let frontier = [entryId];
-  for (let d = 0; d < 15; d++) {
+  while (frontier.length) {
     const next = [];
     for (const id of frontier) {
       cy.$('#' + CSS.escape(id)).outgoers('edge').forEach((e) => {
@@ -523,7 +525,6 @@ function highlightSubgraph(entryId) {
         }
       });
     }
-    if (!next.length) break;
     frontier = next;
   }
   cy.elements().addClass('dimmed');
@@ -600,7 +601,7 @@ function setLoadStatus(message, isError = false) {
 }
 
 function autoLoadDefaultGraph() {
-  fetch('/output/execution_graph.json')
+  fetch('../output/execution_graph.json')
     .then((response) => {
       if (!response.ok) {
         throw new Error(`${response.status} ${response.statusText}`);
